@@ -1,0 +1,43 @@
+{
+  "name": "update-pkg",
+  "description": "Update or lint a package.json based on globally stored preferences.",
+  "version": "0.1.0",
+  "homepage": "https://github.com/jonschlinkert/update-pkg",
+  "author": "Jon Schlinkert (https://github.com/jonschlinkert)",
+  "repository": "jonschlinkert/update-pkg",
+  "bugs": {
+    "url": "https://github.com/jonschlinkert/update-pkg/bugs"
+  },
+  "license": "MIT",
+  "files": [
+    "ignore.js",
+    "updatefile.js"
+  ],
+  "main": "index.js",
+  "engines": {
+    "node": ">=0.10.0"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "bin": {},
+  "dependencies": {
+    "extend-shallow": "^2.0.1",
+    "normalize-pkg": "^0.2.1"
+  },
+  "keywords": [
+    "config",
+    "init",
+    "metadata",
+    "normalize",
+    "package",
+    "pkg",
+    "update"
+  ],
+  "verb": {
+    "related": {
+      "list": [],
+      "description": ""
+    }
+  }
+}
