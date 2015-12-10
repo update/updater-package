@@ -11,7 +11,8 @@
   "license": "MIT",
   "files": [
     "ignore.js",
-    "updatefile.js"
+    "updatefile.js",
+    "index.js"
   ],
   "main": "index.js",
   "engines": {
@@ -23,7 +24,7 @@
   "bin": {},
   "dependencies": {
     "extend-shallow": "^2.0.1",
-    "normalize-pkg": "^0.2.1"
+    "normalize-pkg": "^0.2.3"
   },
   "keywords": [
     "config",
@@ -36,8 +37,11 @@
   ],
   "verb": {
     "related": {
-      "list": [],
-      "description": ""
+      "list": [
+        "update",
+        "assemble",
+        "generate"
+      ]
     }
   }
 }
