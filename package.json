@@ -1,30 +1,37 @@
 {
-  "name": "update-pkg",
-  "description": "Update or lint a package.json based on globally stored preferences.",
+  "name": "updater-package",
+  "description": "Update a package.json based on globally stored preferences.",
   "version": "0.1.0",
-  "homepage": "https://github.com/jonschlinkert/update-pkg",
+  "homepage": "https://github.com/update/updater-package",
   "author": "Jon Schlinkert (https://github.com/jonschlinkert)",
-  "repository": "jonschlinkert/update-pkg",
+  "repository": "update/updater-package",
   "bugs": {
-    "url": "https://github.com/jonschlinkert/update-pkg/bugs"
+    "url": "https://github.com/update/updater-package/issues"
   },
   "license": "MIT",
   "files": [
-    "ignore.js",
-    "updatefile.js",
-    "index.js"
+    "index.js",
+    "updatefile.js"
   ],
   "main": "index.js",
+  "preferGlobal": true,
   "engines": {
     "node": ">=0.10.0"
   },
   "scripts": {
     "test": "mocha"
   },
-  "bin": {},
   "dependencies": {
-    "extend-shallow": "^2.0.1",
-    "normalize-pkg": "^0.2.3"
+    "base-pkg": "^0.2.4",
+    "fs-exists-sync": "^0.1.0",
+    "is-valid-app": "^0.2.0",
+    "normalize-pkg": "^0.3.13",
+    "parse-git-config": "^0.4.2",
+    "through2": "^2.0.1",
+    "vinyl": "^1.1.1"
+  },
+  "devDependencies": {
+    "gulp-format-md": "^0.1.9"
   },
   "keywords": [
     "config",
@@ -36,12 +43,28 @@
     "update"
   ],
   "verb": {
+    "run": true,
+    "toc": false,
+    "layout": "common-minimal",
+    "tasks": [
+      "readme"
+    ],
+    "plugins": [
+      "gulp-format-md"
+    ],
     "related": {
       "list": [
-        "update",
         "assemble",
-        "generate"
+        "generate",
+        "updater-license"
       ]
+    },
+    "reflinks": [
+      "verb",
+      "update"
+    ],
+    "lint": {
+      "reflinks": true
     }
   }
 }
