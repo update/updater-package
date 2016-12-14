@@ -163,9 +163,19 @@ describe('updater-package', function() {
       app.update('package:package-normalize', exists('package.json', true, cb));
     });
 
+    it('should run the `normalize` task', function(cb) {
+      app.register('package', updater);
+      app.update('package:normalize', exists('package.json', true, cb));
+    });
+
     it('should run the `package-index` task', function(cb) {
-      app.register('package-index', updater);
+      app.register('package', updater);
       app.update('package:package-index', exists('package.json', false, cb));
+    });
+
+    it('should run the `index` task', function(cb) {
+      app.register('package', updater);
+      app.update('package:index', exists('package.json', false, cb));
     });
 
     it('should `package.json` default file', function(cb) {
