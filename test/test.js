@@ -21,53 +21,40 @@ function exists(name, normalized, cb) {
   return function(err) {
     if (err) return cb(err);
     assert(existsSync(filepath));
-
-    var pkg = JSON.parse(fs.readFileSync(filepath, 'utf8'));
-    if (normalized) {
-      assert(pkg.hasOwnProperty('license'));
-      assert.equal(pkg.license, 'MIT');
-      assert.equal(pkg.name, 'test-one');
-      assert.equal(pkg.version, '0.1.0');
-      assert.equal(pkg.homepage, 'https://github.com/jonschlinkert/test-one');
-      assert.equal(pkg.repository, 'jonschlinkert/test-one');
-      assert.equal(pkg.license, 'MIT');
-      assert.equal(pkg.main, 'index.js');
-      assert.deepEqual(pkg.bugs, { url: 'https://github.com/jonschlinkert/test-one/issues' });
-      assert.deepEqual(pkg.files, [ 'index.js', 'LICENSE', 'README.md', 'utils.js' ]);
-      assert.deepEqual(pkg.engines, { node: '>= 0.10.0' });
-      assert.deepEqual(pkg.keywords, [ 'one', 'test' ]);
-    }
-
     del(path.dirname(filepath), cb);
   }
 }
 
+function createApp(cb) {
+  app = update({silent: true});
+
+  app.cwd = actual();
+  app.option('cwd', actual());
+  app.option('dest', actual());
+  app.option('askWhen', 'not-answered');
+
+  // provide template data to avoid prompts
+  app.data({
+    author: {
+      name: 'Jon Schlinkert',
+      username: 'jonschlnkert',
+      url: 'https://github.com/jonschlinkert'
+    },
+    project: {
+      name: 'foo',
+      description: 'bar',
+      version: '0.1.0'
+    }
+  });
+  copy(fixtures('*'), actual(), cb);
+}
+
 describe('updater-package', function() {
-  beforeEach(function(cb) {
-    app = update({silent: true});
-
-    app.cwd = actual();
-    app.option('dest', actual());
-    app.option('askWhen', 'not-answered');
-
-    // provide template data to avoid prompts
-    app.data({
-      author: {
-        name: 'Jon Schlinkert',
-        username: 'jonschlnkert',
-        url: 'https://github.com/jonschlinkert'
-      },
-      project: {
-        name: 'foo',
-        description: 'bar',
-        version: '0.1.0'
-      }
+  describe('plugin', function() {
+    beforeEach(function(cb) {
+      createApp(cb);
     });
 
-    copy(fixtures('*'), actual(), cb);
-  });
-
-  describe('plugin', function() {
     it('should only register the plugin once', function(cb) {
       var count = 0;
       app.on('plugin', function(name) {
@@ -125,6 +112,14 @@ describe('updater-package', function() {
       console.log('updater-package is not installed globally, skipping CLI tests');
     } else {
       describe('updater (CLI)', function() {
+        beforeEach(function(cb) {
+          createApp(cb);
+        });
+
+        it('should run the default task using the `updater-package` name', function(cb) {
+          app.update('updater-package', exists('package.json', true, cb));
+        });
+
         it('should run the default task using the `updater-package` name', function(cb) {
           app.use(updater);
           app.update('updater-package', exists('package.json', true, cb));
@@ -144,23 +139,27 @@ describe('updater-package', function() {
   }
 
   describe('updater (API)', function() {
+    beforeEach(function(cb) {
+      createApp(cb);
+    });
+
     it('should run the default task on the updater', function(cb) {
-      app.register('package-normalize', updater);
-      app.update('package-normalize', exists('package.json', true, cb));
+      app.register('package', updater);
+      app.update('package', exists('package.json', true, cb));
     });
 
     it('should run the `default` task when defined explicitly', function(cb) {
-      app.register('package-normalize', updater);
+      app.register('package', updater);
       app.update('package:default', exists('package.json', true, cb));
     });
 
     it('should run the `package` task', function(cb) {
-      app.register('package-normalize', updater);
+      app.register('package', updater);
       app.update('package:package-normalize', exists('package.json', true, cb));
     });
 
     it('should run the `package-normalize` task', function(cb) {
-      app.register('package-normalize', updater);
+      app.register('package', updater);
       app.update('package:package-normalize', exists('package.json', true, cb));
     });
 
@@ -170,9 +169,9 @@ describe('updater-package', function() {
     });
 
     it('should `package.json` default file', function(cb) {
-      app.register('package-normalize', updater);
+      app.register('package', updater);
 
-      app.update('package-normalize', true, function(err) {
+      app.update('package:normalize', function(err) {
         if (err) return cb(err);
         var fp = actual('package.json');
         assert(existsSync(fp));
@@ -184,18 +183,22 @@ describe('updater-package', function() {
   });
 
   describe('sub-updater', function() {
+    beforeEach(function(cb) {
+      createApp(cb);
+    });
+
     it('should work as a sub-updater', function(cb) {
       app.register('foo', function(foo) {
-        foo.register('package-normalize', updater);
+        foo.register('package', updater);
       });
-      app.update('foo.package-normalize', exists('package.json', true, cb));
+      app.update('foo.package:normalize', exists('package.json', true, cb));
     });
 
     it('should run the `default` task by default', function(cb) {
       app.register('foo', function(foo) {
-        foo.register('package-normalize', updater);
+        foo.register('package', updater);
       });
-      app.update('foo.package-normalize', exists('package.json', true, cb));
+      app.update('foo.package:normalize', exists('package.json', true, cb));
     });
 
     it('should run the `package:default` task when defined explicitly', function(cb) {
