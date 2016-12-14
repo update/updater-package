@@ -17,7 +17,7 @@
   "main": "index.js",
   "preferGlobal": true,
   "engines": {
-    "node": ">=0.10.0"
+    "node": ">=4.0"
   },
   "scripts": {
     "test": "mocha"
@@ -62,6 +62,7 @@
     "update",
     "update-plugin",
     "update-updater",
+    "updater-package",
     "updater",
     "updaterplugin"
   ],
@@ -80,9 +81,9 @@
     ],
     "related": {
       "list": [
-        "assemble",
-        "generate",
-        "updater-license"
+        "updater-eslint",
+        "updater-license",
+        "updater-travis"
       ]
     },
     "reflinks": [
