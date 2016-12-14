@@ -9,6 +9,7 @@ require = utils;
  * Lazily required module dependencies
  */
 
+require('arrayify-compact', 'compact');
 require('base-pkg', 'pkg');
 require('fs-exists-sync', 'exists');
 require('mixin-deep', 'merge');
@@ -36,7 +37,6 @@ utils.fields = {
   repository: {
     types: ['object', 'string'],
     normalize: function(val, key, config, schema) {
-      console.log(arguments)
       return val;
     }
   },
@@ -44,7 +44,7 @@ utils.fields = {
 
 utils.fixRepo = function(app, str) {
   var owner = utils.getOwner(app);
-
+  // TODO
 };
 
 utils.getFile = function(cwd) {

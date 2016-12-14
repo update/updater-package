@@ -9,11 +9,14 @@ module.exports = function(app) {
 
   app.use(utils.pkg());
   app.option(app.base.options);
-  app.preWrite(/package.json/, function(file, next) {
+  app.preWrite(/package\.json/, function(file, next) {
     var pkg = JSON.parse(file.contents);
-    pkg.files = pkg.files.filter(function(name) {
-      return !/license|readme\.md/i.test(name);
-    });
+
+    if (Array.isArray(pkg.files)) {
+      pkg.files = utils.compact(pkg.files).filter(function(name) {
+        return !/license|readme\.md/i.test(name);
+      });
+    }
 
     var deps = pkg.devDependencies;
     if (deps && deps['verb-tag-jscomments']) {
@@ -22,7 +25,9 @@ module.exports = function(app) {
       pkg.devDependencies = deps;
     }
 
-    file.contents = new Buffer(JSON.stringify(pkg, null, 2).replace(/\s+$/, '\n'));
+    var str = JSON.stringify(pkg, null, 2).trim();
+    str += '\n';
+    file.contents = new Buffer(str);
     next();
   });
 
@@ -66,10 +71,9 @@ module.exports = function(app) {
   app.task('normalize', ['package-normalize']);
   app.task('package-normalize', {silent: true}, function() {
     var opts = utils.merge({}, app.option('pkg'));
-
     return app.src('package.json', {cwd: app.cwd})
       .pipe(normalize(opts))
-      .pipe(app.dest(app.cwd));
+      .pipe(app.dest(app.cwd))
   });
 
   /**
