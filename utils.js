@@ -70,6 +70,10 @@ utils.getRepo = function(pkg) {
   return repo;
 };
 
+/**
+ * TODO: externalize to user home plugin
+ */
+
 utils.updateOwner = function(pkg) {
   var name = pkg.name;
   var repo = utils.getRepo(pkg);
@@ -85,14 +89,22 @@ utils.updateOwner = function(pkg) {
     owner = 'node-base';
   } else if (/^assemble-/.test(name)) {
     owner = 'assemble';
+  } else if (/^boilerplate-/.test(name)) {
+    owner = 'boilerplate';
+  } else if (/^enquirer-/.test(name)) {
+    owner = 'enquirer';
   } else if (/^generate-/.test(name)) {
     owner = 'generate';
   } else if (/^(helper|handlebars-helper)-/.test(name)) {
     owner = 'helpers';
+  } else if (/^-regex/.test(name)) {
+    owner = 'regexhq';
   } else if (/^sellside-/.test(name)) {
     owner = 'sellside';
   } else if (/^toolkit-/.test(name)) {
     owner = 'node-toolkit';
+  } else if (/^upstage-/.test(name)) {
+    owner = 'upstage';
   } else if (/^updater-/.test(name)) {
     owner = 'update';
   } else if (/^verb-/.test(name)) {
