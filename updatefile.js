@@ -1,33 +1,28 @@
 'use strict';
 
 var path = require('path');
+var extend = require('extend-shallow');
+var stringify = require('stringify-author');
 var normalize = require('gulp-normalize-pkg');
+var parse = require('parse-author');
 var utils = require('./utils');
 
 module.exports = function(app) {
   if (!utils.isValid(app, 'updater-package')) return;
+  var contributors = {};
 
   app.use(utils.pkg());
   app.option(app.base.options);
+  app.onLoad(/package\.json/, function(file, next) {
+    var pkg = JSON.parse(file.content);
+    if (Array.isArray(pkg.contributors)) {
+      contributors = parsePersons(pkg.contributors);
+    }
+    next();
+  });
+  app.preWrite(/package\.json/, formatPreWrite(app));
   app.preWrite(/package\.json/, function(file, next) {
-    var pkg = JSON.parse(file.contents);
-
-    if (Array.isArray(pkg.files)) {
-      pkg.files = utils.compact(pkg.files).filter(function(name) {
-        return !/license|readme\.md/i.test(name);
-      });
-    }
-
-    var deps = pkg.devDependencies;
-    if (deps && deps['verb-tag-jscomments']) {
-      delete deps['verb-tag-jscomments'];
-      delete deps['verb'];
-      pkg.devDependencies = deps;
-    }
-
-    var str = JSON.stringify(pkg, null, 2).trim();
-    str += '\n';
-    file.contents = new Buffer(str);
+    file.content = file.content.replace(/\s+$/, '') + '\n';
     next();
   });
 
@@ -47,12 +42,11 @@ module.exports = function(app) {
    */
 
   app.task('package-update', {silent: true}, function() {
-    var opts = utils.merge({}, app.option('pkg'));
-
+    var opts = extend({}, app.option('pkg'));
     return app.src('package.json', {cwd: app.cwd})
       .pipe(createIndex(app))
       .pipe(normalize(opts))
-      .pipe(owner())
+      .pipe(owner(app))
       .pipe(app.dest(app.cwd));
   });
 
@@ -70,7 +64,7 @@ module.exports = function(app) {
 
   app.task('normalize', ['package-normalize']);
   app.task('package-normalize', {silent: true}, function() {
-    var opts = utils.merge({}, app.option('pkg'));
+    var opts = extend({}, app.option('pkg'));
     return app.src('package.json', {cwd: app.cwd})
       .pipe(normalize(opts))
       .pipe(app.dest(app.cwd))
@@ -111,53 +105,113 @@ module.exports = function(app) {
    });
 };
 
-function newline(nl) {
-  if (typeof nl !== 'string') nl = '\n';
-  return utils.through.obj(function(file, enc, next) {
-    var str = file.contents.toString().replace(/\s+$/, '');
-    file.contents = new Buffer(str + nl);
-    next(null, file);
-  });
-}
-
 function createIndex(app) {
   return utils.through.obj(function(file, enc, next) {
     var pkg = JSON.parse(file.contents.toString());
-    var indexPath = path.resolve(app.cwd, 'index.js');
+    if (pkg.license && /Released/i.test(pkg.license)) {
+      pkg.license = 'MIT';
+    }
 
+    var indexPath = path.resolve(app.cwd, 'index.js');
+    var re = /^(updater|generate|assemble|verb)-/;
     if (!pkg.hasOwnProperty('main') && !utils.exists(indexPath)) {
-      var configfile = utils.getFile(app.cwd);
-      if (configfile) {
+      if (re.test(pkg.name) && configfile.length) {
         var contents = `'use strict';\n\nmodule.exports = require('./${configfile}');`;
         pkg.files = pkg.files || [];
         if (pkg.files.indexOf('index.js') === -1) {
           pkg.files.push('index.js');
         }
-        if (pkg.files.indexOf(configfile + '.js') === -1) {
-          pkg.files.push(configfile + '.js');
-        }
         pkg.main = 'index.js';
         pkg.files.sort();
-
         var index = new utils.File({path: indexPath, contents: new Buffer(contents)});
         this.push(index);
       }
     }
-
     file.contents = new Buffer(JSON.stringify(pkg, null, 2));
     next(null, file);
   });
 }
 
-function owner(options) {
+function formatPreWrite(app, contributors) {
+  return function(file, next) {
+    var pkg = JSON.parse(file.contents);
+    if (Array.isArray(pkg.files)) {
+      pkg.files = utils.compact(pkg.files).filter(function(name) {
+        return !/license|readme\.md/i.test(name);
+      });
+    }
+
+    if (Array.isArray(pkg.contributors)) {
+      pkg.contributors = updateContributors(pkg, contributors);
+    }
+
+    // add user defined files to `files`
+    addFiles(app, pkg);
+
+    var deps = pkg.devDependencies;
+    if (deps && deps['verb-tag-jscomments']) {
+      delete deps['verb-tag-jscomments'];
+      delete deps['verb'];
+      pkg.devDependencies = deps;
+    }
+
+    var str = JSON.stringify(pkg, null, 2).trim();
+    str += '\n';
+    file.contents = new Buffer(str);
+    next();
+  };
+}
+
+/**
+ * Add user defined files to `files`, but only if they exist
+ * @param {Object} app
+ * @param {Object} pkg
+ */
+
+function addFiles(app, pkg) {
+  utils.addFiles(app.cwd, pkg, app.options.addFiles);
+}
+
+function updateContributors(pkg, origContribs) {
+  var res = [];
+  var obj = parsePersons(utils.compact(pkg.contributors));
+  var contributors = extend({}, obj, origContribs);
+  var keys = Object.keys(contributors);
+  keys.sort(function(a, b) {
+    return a.localeCompare(b);
+  });
+
+  for (var i = 0; i < keys.length; i++) {
+    var key = keys[i];
+    var person =  contributors[key];
+    delete person.email;
+    res.push(stringify(person));
+  }
+  return res;
+}
+
+function parsePersons(arr) {
+  var res = {};
+  for (var i = 0; i < arr.length; i++) {
+    var val = arr[i];
+    if (typeof val !== 'string') {
+      res[val.name] = val;
+      continue;
+    }
+    var obj = parse(val);
+    res[obj.name] = obj;
+  }
+  return res;
+}
+
+function owner(app) {
   return utils.through.obj(function(file, enc, next) {
     if (file.basename !== 'package.json') {
       next();
       return;
     }
-
     var pkg = JSON.parse(file.contents.toString());
-    utils.updateOwner(pkg);
+    utils.updateOwner(app, pkg);
     file.contents = new Buffer(JSON.stringify(pkg, null, 2));
     next(null, file);
   });

@@ -25,24 +25,29 @@
   "dependencies": {
     "arrayify-compact": "^0.2.0",
     "base-pkg": "^0.2.4",
+    "extend-shallow": "^2.0.1",
     "fs-exists-sync": "^0.1.0",
-    "generate-package": "^0.7.2",
+    "generate-package": "^0.7.3",
+    "get-value": "^2.0.6",
     "gulp-normalize-pkg": "^0.1.2",
-    "is-valid-app": "^0.2.1",
+    "is-valid-app": "^0.3.0",
     "isobject": "^3.0.0",
     "lazy-cache": "^2.0.2",
-    "mixin-deep": "^1.1.3",
+    "parse-author": "^2.0.0",
     "parse-git-config": "^1.1.1",
-    "parse-github-url": "^0.3.2",
+    "parse-github-url": "^1.0.0",
+    "repo-utils": "^0.4.1",
+    "set-value": "^0.4.3",
+    "stringify-author": "^0.1.3",
     "through2": "^2.0.3",
-    "vinyl": "^2.0.1"
+    "vinyl": "^2.0.2"
   },
   "devDependencies": {
     "copy": "^0.3.0",
     "delete": "^0.3.2",
     "global-modules": "^0.2.3",
-    "gulp-format-md": "^0.1.11",
-    "mocha": "^3.2.0",
+    "gulp-format-md": "^0.1.12",
+    "mocha": "^3.4.1",
     "update": "^0.7.4"
   },
   "keywords": [
@@ -52,6 +57,7 @@
     "lint",
     "linter",
     "maintain",
+    "maintainance",
     "metadata",
     "normalize",
     "package",
@@ -62,13 +68,12 @@
     "update",
     "update-plugin",
     "update-updater",
-    "updater-package",
+    "updateplugin",
     "updater",
-    "updaterplugin"
+    "updater-package",
+    "updaterplugin",
+    "upkeep"
   ],
-  "update": {
-    "run": true
-  },
   "verb": {
     "run": true,
     "toc": false,
