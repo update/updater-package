@@ -20,7 +20,7 @@ module.exports = function(app) {
     }
     next();
   });
-  app.preWrite(/package\.json/, formatPreWrite(app));
+  app.preWrite(/package\.json/, formatPreWrite(app, contributors));
   app.preWrite(/package\.json/, function(file, next) {
     file.content = file.content.replace(/\s+$/, '') + '\n';
     next();
@@ -67,7 +67,7 @@ module.exports = function(app) {
     var opts = extend({}, app.option('pkg'));
     return app.src('package.json', {cwd: app.cwd})
       .pipe(normalize(opts))
-      .pipe(app.dest(app.cwd))
+      .pipe(app.dest(app.cwd));
   });
 
   /**
@@ -99,10 +99,10 @@ module.exports = function(app) {
    * @api public
    */
 
-   app.task('new', function(cb) {
-     app.register('generate-package', require('generate-package'));
-     app.generate('generate-package', cb);
-   });
+  app.task('new', function(cb) {
+    app.register('generate-package', require('generate-package'));
+    app.generate('generate-package', cb);
+  });
 };
 
 function createIndex(app) {
@@ -184,7 +184,7 @@ function updateContributors(pkg, origContribs) {
 
   for (var i = 0; i < keys.length; i++) {
     var key = keys[i];
-    var person =  contributors[key];
+    var person = contributors[key];
     delete person.email;
     res.push(stringify(person));
   }
