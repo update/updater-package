@@ -1,7 +1,7 @@
 {
   "name": "updater-package",
   "description": "Update a package.json based on globally stored preferences.",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "homepage": "https://github.com/update/updater-package",
   "author": "Jon Schlinkert (https://github.com/jonschlinkert)",
   "repository": "update/updater-package",
