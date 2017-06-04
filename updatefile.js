@@ -115,8 +115,8 @@ function createIndex(app) {
     var indexPath = path.resolve(app.cwd, 'index.js');
     var re = /^(updater|generate|assemble|verb)-/;
     if (!pkg.hasOwnProperty('main') && !utils.exists(indexPath)) {
-      var configfile = utils.getFile(app.cwd);
-      if (re.test(pkg.name) && configfile) {
+      var configfiles = utils.getFiles(app.cwd, app.options.configfiles);
+      if (re.test(pkg.name) && configfiles.length) {
         var contents = `'use strict';\n\nmodule.exports = require('./${configfile}');`;
         pkg.files = pkg.files || [];
         if (pkg.files.indexOf('index.js') === -1) {

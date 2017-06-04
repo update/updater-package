@@ -46,6 +46,9 @@ utils.fields = {
 
 utils.getFiles = function(cwd, files) {
   files = utils.compact(files);
+  if (!files.length)  {
+    files = ['updatefile.js', 'generator.js', 'lintfile.js'];
+  }
   var len = files.length;
   var idx = -1;
   var arr = [];
